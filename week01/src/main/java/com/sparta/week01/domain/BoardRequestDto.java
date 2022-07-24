@@ -9,8 +9,8 @@ import lombok.Setter;
 @Setter
 @RequiredArgsConstructor
 public class BoardRequestDto {
-    private String author;
     private String title;
     private String contents;
+    private String author;
     private int password;
 }
