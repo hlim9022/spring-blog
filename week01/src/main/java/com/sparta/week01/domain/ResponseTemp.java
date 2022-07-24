@@ -13,17 +13,12 @@ public class ResponseTemp<T> {
     private T data;
     private Map<String, String> error;
 
+
     public ResponseTemp<T> getHttpResponseTemp(T data) {
         ResponseTemp<T> res = new ResponseTemp<>();
-        if(HttpStatus.OK.is2xxSuccessful()){
-            res.setSuccess(true);
-            res.setData(data);
-            res.setError(res.getError());
-        } else {
-            res.setSuccess(false);
-            res.setData(null);
-            res.setError(res.getError());
-        }
+        res.setSuccess(HttpStatus.OK.is2xxSuccessful());
+        res.setData(data);
+        res.setError(res.getError());
         return res;
     }
 }

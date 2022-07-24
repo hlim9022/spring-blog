@@ -10,9 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 
 @RestController
@@ -36,16 +35,25 @@ public class BoardController {
         return new ResponseEntity<>(res.getHttpResponseTemp(addBoard), HttpStatus.OK);
     }
 
+
     @DeleteMapping("/blog/list/{id}")
     public ResponseEntity<ResponseTemp<Board>> deleteBlog(@PathVariable Long id) {
         ResponseTemp<Board> res = new ResponseTemp<>();
+        if(boardRepository.findById(id).isPresent()){
             boardRepository.deleteById(id);
+            res.getHttpResponseTemp(null);
 
-            res.setSuccess(HttpStatus.ACCEPTED.is2xxSuccessful());
+            return new ResponseEntity<>(res,HttpStatus.OK);
+        } else {
+            res.setSuccess(false);
             res.setData(null);
-            res.setError(res.getError());
+            res.setError(new HashMap<>(){{ put("code","NULL_POST_ID");
+                put("message","post id isn't exist");
+            }});
 
-        return new ResponseEntity<>(res,HttpStatus.OK);
+            return new ResponseEntity<>(res,HttpStatus.BAD_REQUEST);
+        }
+
     }
 
 
@@ -53,9 +61,19 @@ public class BoardController {
     public ResponseEntity<ResponseTemp<Board>> modifyBlog(@PathVariable Long id,
                                                           @RequestBody BoardRequestDto requestDto) {
 
-        Board update = boardService.update(id, requestDto);
         ResponseTemp<Board> res = new ResponseTemp<>();
-        return new ResponseEntity<>(res.getHttpResponseTemp(update), HttpStatus.OK);
+        if(boardRepository.findById(id).isPresent()){
+            Board update = boardService.update(id, requestDto);
+            return new ResponseEntity<>(res.getHttpResponseTemp(update), HttpStatus.OK);
+        } else {
+            res.setSuccess(false);
+            res.setData(null);
+            res.setError(new HashMap<>(){{ put("code","NULL_POST_ID");
+                put("message","post id isn't exist");
+            }});
+
+            return new ResponseEntity<>(res,HttpStatus.BAD_REQUEST);
+        }
     }
 
 
@@ -71,9 +89,21 @@ public class BoardController {
 
     @GetMapping("/blog/list/{id}")
     public ResponseEntity<ResponseTemp<Board>> readBlog(@PathVariable Long id) {
-        Board findOne = boardRepository.findById(id).get();
         ResponseTemp<Board> res = new ResponseTemp<>();
-        return new ResponseEntity<>(res.getHttpResponseTemp(findOne), HttpStatus.OK);
+
+        if(boardRepository.findById(id).isPresent()) {
+            Board findOne = boardRepository.findById(id).get();
+
+            return new ResponseEntity<>(res.getHttpResponseTemp(findOne), HttpStatus.OK);
+        } else {
+            res.setSuccess(false);
+            res.setData(null);
+            res.setError(new HashMap<>(){{ put("code","NULL_POST_ID");
+                put("message","post id isn't exist");
+            }});
+
+            return new ResponseEntity<>(res,HttpStatus.BAD_REQUEST);
+        }
     }
 
 }
