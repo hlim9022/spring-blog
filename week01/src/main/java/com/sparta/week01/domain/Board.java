@@ -29,14 +29,6 @@ public class Board extends Timestamped{
     private Integer password;
 
 
-    public Board(String author, String title, String contents, int password) {
-        this.author = author;
-        this.title = title;
-        this.contents = contents;
-        this.password = password;
-    }
-
-
     public Board(BoardRequestDto requestDto){
         this.author = requestDto.getAuthor();
         this.title = requestDto.getTitle();

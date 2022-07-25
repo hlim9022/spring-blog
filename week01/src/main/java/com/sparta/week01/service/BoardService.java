@@ -7,28 +7,23 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class BoardService {
-
     private final BoardRepository boardRepository;
-
     @Transactional
     public Board update(Long id, BoardRequestDto requestDto) {
-        Board board = boardRepository.findById(id).orElseThrow(
-                () -> new NullPointerException("찾으시는 글이 없습니다.")
-        );
-
+        Board board = boardRepository.findById(id).get();
         board.update(requestDto);
         return board;
     }
 
     @Transactional
     public boolean checkPassword(Long id, Integer password) {
-//        boardRepository.findById(id).stream()
-        return boardRepository.findById(id).filter(x->x.getPassword().equals(password))
-                .isPresent();
+        Board foundBoard = boardRepository.findById(id).get();
+        return Objects.equals(foundBoard.getPassword(), password);
     }
 
 }
