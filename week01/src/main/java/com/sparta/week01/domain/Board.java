@@ -1,6 +1,7 @@
 package com.sparta.week01.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sparta.week01.dto.BoardRequestDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
