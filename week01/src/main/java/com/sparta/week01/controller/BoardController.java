@@ -1,129 +1,60 @@
 package com.sparta.week01.controller;
 
-import com.sparta.week01.domain.*;
+import com.sparta.week01.domain.BoardRequestDto;
+import com.sparta.week01.domain.ResponseTemp;
 import com.sparta.week01.service.BoardService;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 
 @RestController
+@AllArgsConstructor
 public class BoardController {
-
-    private final BoardRepository boardRepository;
     private final BoardService boardService;
 
-    @Autowired
-    public BoardController(BoardRepository boardRepository, BoardService boardService) {
-        this.boardRepository = boardRepository;
-        this.boardService = boardService;
-    }
 
     //전체 블로그글 목록 조회
     @GetMapping("/blog/list")
-    public ResponseEntity<ResponseTemp<List<ShowAllBoardList>>> getBlogList() {
-        List<ShowAllBoardList> boardList = boardRepository.findAllByOrderByCreatedAtDesc();
-
-        ResponseTemp<List<ShowAllBoardList>> res = new ResponseTemp<>();
-        return new ResponseEntity<>(res.getHttpResponseTemp(HttpStatus.OK.value(), boardList), HttpStatus.OK);
+    public ResponseTemp<?> getBlogList() {
+        return boardService.getAllBlogList();
     }
-
 
     //글작성
     @PostMapping("/blog/list")
-    public ResponseEntity<ResponseTemp<Board>> createBlog(@RequestBody BoardRequestDto requestDto) {
-        Board addBoard = boardRepository.save(new Board(requestDto));
-        ResponseTemp<Board> res = new ResponseTemp<>();
-        return new ResponseEntity<>(res.getHttpResponseTemp(HttpStatus.OK.value(), addBoard), HttpStatus.OK);
+    public ResponseTemp<?> createBlog(@RequestBody BoardRequestDto requestDto) {
+        return boardService.createBlog(requestDto);
     }
 
     //글 상세조회
     @GetMapping("/blog/list/{id}")
-    public ResponseEntity<ResponseTemp<Board>> readBlog(@PathVariable Long id) {
-        ResponseTemp<Board> res = new ResponseTemp<>();
+    public ResponseTemp<?> readBlog(@PathVariable Long id) {
+        return boardService.getOnePost(id);
+    }
 
-        if(boardRepository.findById(id).isPresent()) {
-            Board findOne = boardRepository.findById(id).get();
-            return new ResponseEntity<>(res.getHttpResponseTemp(HttpStatus.OK.value(), findOne), HttpStatus.OK);
-        } else {
 
-            res.getHttpResponseTemp(HttpStatus.NOT_FOUND.value(),null);
-            return new ResponseEntity<>(res,HttpStatus.NOT_FOUND);
-        }
+    // 글수정
+    @PutMapping("/blog/list/{id}")
+    public ResponseTemp<?> modifyBlog(@PathVariable Long id,
+                                      @RequestBody BoardRequestDto requestDto) {
+        return boardService.modifyPost(id, requestDto);
     }
 
 
     //글삭제
     @DeleteMapping("/blog/list/{id}")
-    public ResponseEntity<ResponseTemp<Board>> deleteBlog(@PathVariable Long id,
-                                                          @RequestBody String password) {
-        ResponseTemp<Board> res = new ResponseTemp<>();
-
-        JSONObject jsonObject = new JSONObject(password);
-        int convertPw = jsonObject.getInt("password");
-
-        if(boardRepository.findById(id).isPresent()) {
-            if (boardService.checkPassword(id, convertPw)) {
-                boardRepository.deleteById(id);
-                res.getHttpResponseTemp(HttpStatus.OK.value(), null);
-
-                return new ResponseEntity<>(res, HttpStatus.OK);
-            } else {
-                res.getHttpResponseTemp(HttpStatus.BAD_REQUEST.value(), null);
-                return new ResponseEntity<>(res, HttpStatus.BAD_REQUEST);
-            }
-        } else {
-            res.getHttpResponseTemp(HttpStatus.NOT_FOUND.value(), null);
-            return new ResponseEntity<>(res, HttpStatus.NOT_FOUND);
-        }
-
+    public ResponseTemp<?> deleteBlog(@PathVariable Long id,
+                                        @RequestBody String password) {
+        return boardService.deletePost(id, password);
     }
-
-
-    //글수정
-    @PutMapping("/blog/list/{id}")
-    public ResponseEntity<ResponseTemp<Board>> modifyBlog(@PathVariable Long id,
-                                                          @RequestBody BoardRequestDto requestDto) {
-        ResponseTemp<Board> res = new ResponseTemp<>();
-
-        if(boardRepository.findById(id).isPresent()) {
-            if(boardService.checkPassword(id,requestDto.getPassword())){
-                Board update = boardService.update(id, requestDto);
-                return new ResponseEntity<>(res.getHttpResponseTemp(HttpStatus.OK.value(), update), HttpStatus.OK);
-            } else {
-                res.getHttpResponseTemp(HttpStatus.BAD_REQUEST.value(),null);
-                return new ResponseEntity<>(res,HttpStatus.BAD_REQUEST);
-            }
-        } else {
-            res.getHttpResponseTemp(HttpStatus.NOT_FOUND.value(),null);
-            return new ResponseEntity<>(res,HttpStatus.NOT_FOUND);
-        }
-    }
-
-
 
     //패스워드 확인
     @PostMapping("/blog/list/{id}")
-    public ResponseEntity<ResponseTemp<Boolean>>  checkPassword(@PathVariable Long id, @RequestBody String password) {
-        ResponseTemp<Boolean> res = new ResponseTemp<>();
-
-        JSONObject jsonObject = new JSONObject(password);
-        int convertPw = jsonObject.getInt("password");
-
-        boolean result = boardService.checkPassword(id, convertPw);
-
-        if(result) {
-            return new ResponseEntity<>(res.getHttpResponseTemp(HttpStatus.OK.value(),true), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(res.getHttpResponseTemp(HttpStatus.BAD_REQUEST.value(), false), HttpStatus.NOT_FOUND);
-        }
+    public ResponseTemp<?>  checkPassword(@PathVariable Long id,
+                                          @RequestBody String password) {
+        return boardService.checkPassword(id, password);
     }
-
-
-
 
 }
 

@@ -26,7 +26,7 @@ public class Board extends Timestamped{
 
     @JsonIgnore
     @Column(nullable = false)
-    private Integer password;
+    private String password;
 
 
     public Board(BoardRequestDto requestDto){

@@ -8,3 +8,5 @@ public interface ShowAllBoardList {
     String getAuthor();
     String getTitle();
 }
+
+
