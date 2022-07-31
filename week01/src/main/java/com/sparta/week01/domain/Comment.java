@@ -1,7 +1,6 @@
 package com.sparta.week01.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.sparta.week01.dto.CommentDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +14,7 @@ import javax.persistence.*;
 public class Comment extends Timestamped{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "COMMENT_ID")
     private Long id;
 
@@ -30,5 +29,9 @@ public class Comment extends Timestamped{
     public Comment(String comment, Board board) {
         this.comment = comment;
         this.board = board;
+    }
+
+    public void update(String comment) {
+        this.comment = comment;
     }
 }

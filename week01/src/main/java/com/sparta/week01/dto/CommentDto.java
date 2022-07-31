@@ -10,5 +10,4 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CommentDto {
     private String comment;
-    private Long boardId;
 }

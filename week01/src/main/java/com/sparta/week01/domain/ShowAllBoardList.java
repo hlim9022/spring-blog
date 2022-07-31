@@ -1,10 +1,10 @@
 package com.sparta.week01.domain;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public interface ShowAllBoardList {
     Long getId();
-    LocalDate getCreatedAt();
+    LocalDateTime getCreatedAt();
     String getAuthor();
     String getTitle();
 }
