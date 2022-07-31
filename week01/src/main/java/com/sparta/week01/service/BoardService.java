@@ -100,9 +100,4 @@ public class BoardService {
             return ResponseDto.fail("NULL_POST_ID", "post id isn't exist");
         }
     }
-
-
-
-
-
 }

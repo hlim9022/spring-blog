@@ -9,31 +9,32 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
+@RequestMapping("/blog")
 public class BoardController {
     private final BoardService boardService;
 
 
     //전체 블로그글 목록 조회
-    @GetMapping("/blog/list")
+    @GetMapping("/list")
     public ResponseDto<?> getBlogList() {
         return boardService.getAllBlogList();
     }
 
     //글작성
-    @PostMapping("/blog/list")
+    @PostMapping("/auth/list")
     public ResponseDto<?> createBlog(@RequestBody BoardRequestDto requestDto) {
         return boardService.createBlog(requestDto);
     }
 
     //글 상세조회
-    @GetMapping("/blog/list/{id}")
+    @GetMapping("/list/{id}")
     public ResponseDto<?> readBlog(@PathVariable Long id) {
         return boardService.getOnePost(id);
     }
 
 
     // 글수정
-    @PutMapping("/blog/list/{id}")
+    @PutMapping("/auth/list/{id}")
     public ResponseDto<?> modifyBlog(@PathVariable Long id,
                                      @RequestBody BoardRequestDto requestDto) {
         return boardService.modifyPost(id, requestDto);
@@ -41,14 +42,14 @@ public class BoardController {
 
 
     //글삭제
-    @DeleteMapping("/blog/list/{id}")
+    @DeleteMapping("/auth/list/{id}")
     public ResponseDto<?> deleteBlog(@PathVariable Long id,
                                      @RequestBody String password) {
         return boardService.deletePost(id, password);
     }
 
     //패스워드 확인
-    @PostMapping("/blog/list/{id}")
+    @PostMapping("/auth/list/{id}")
     public ResponseDto<?> checkPassword(@PathVariable Long id,
                                         @RequestBody String password) {
         return boardService.checkPassword(id, password);
