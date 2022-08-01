@@ -1,5 +1,7 @@
 package com.sparta.week01.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -18,6 +20,7 @@ public abstract class Timestamped {
     private LocalDateTime createdAt;
 
     @LastModifiedDate
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private LocalDateTime modifiedAt;
 
 }

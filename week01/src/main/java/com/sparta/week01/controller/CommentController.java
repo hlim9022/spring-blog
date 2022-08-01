@@ -1,14 +1,11 @@
 package com.sparta.week01.controller;
 
 
-import com.sparta.week01.domain.Comment;
 import com.sparta.week01.dto.CommentDto;
 import com.sparta.week01.dto.ResponseDto;
 import com.sparta.week01.service.CommentService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/blog")

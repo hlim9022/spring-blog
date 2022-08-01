@@ -43,33 +43,11 @@ public class BoardService {
 
     @Transactional
     public ResponseDto<?> modifyPost(Long id, BoardRequestDto requestDto) {
-        Object data = checkPassword(id, requestDto.getPassword()).getData();
         if(boardRepository.findById(id).isPresent()) {
-            if(data.equals(true)){
-                Board update = update(id, requestDto);
-                return ResponseDto.success(update);
-            } else {
-                return ResponseDto.fail("WRONG_PASSWORD", "password is wrong.");
-            }
+            Board update = update(id, requestDto);
+            return ResponseDto.success(update);
         } else {
             return ResponseDto.fail("NULL_POST_ID", "post id isn't exist");
-        }
-    }
-
-    @Transactional
-    public ResponseDto<?> checkPassword(Long id, String password) {
-        Board foundBoard = boardRepository.findById(id).orElseThrow(
-                () -> new NullPointerException("찾으시는 id가 없습니다."));
-
-        JSONObject jsonObject = new JSONObject(password);
-        int convertPw = jsonObject.getInt("password");
-
-        boolean isRightPw = Objects.equals(Integer.parseInt(foundBoard.getPassword()), convertPw);
-
-        if(isRightPw) {
-            return ResponseDto.success(true);
-        } else {
-            return ResponseDto.fail("WRONG_PASSWORD", "password is wrong.");
         }
     }
 
@@ -86,16 +64,10 @@ public class BoardService {
     }
 
     @Transactional
-    public ResponseDto<?> deletePost(Long id, String password) {
-        Object data = checkPassword(id, password).getData();
-
+    public ResponseDto<?> deletePost(Long id) {
         if(boardRepository.findById(id).isPresent()) {
-            if (data.equals(true)) {
-                boardRepository.deleteById(id);
-                return ResponseDto.success(null);
-            } else {
-                return ResponseDto.fail("WRONG_PASSWORD", "password is wrong.");
-            }
+            boardRepository.deleteById(id);
+            return ResponseDto.success("delete success");
         } else {
             return ResponseDto.fail("NULL_POST_ID", "post id isn't exist");
         }

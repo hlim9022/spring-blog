@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 public interface ShowAllBoardList {
     Long getId();
     LocalDateTime getCreatedAt();
-    String getAuthor();
     String getTitle();
 }
 

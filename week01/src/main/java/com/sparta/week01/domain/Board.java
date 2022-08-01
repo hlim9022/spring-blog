@@ -27,27 +27,18 @@ public class Board extends Timestamped{
     @Column(nullable = false)
     private String contents;
 
-    @Column(nullable = false)
-    private String author;
-
-    @JsonIgnore
-    @Column(nullable = false)
-    private String password;
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.REMOVE)
     private List<Comment> commentList = new ArrayList<>();
 
 
     public Board(BoardRequestDto requestDto){
-        this.author = requestDto.getAuthor();
         this.title = requestDto.getTitle();
         this.contents = requestDto.getContents();
-        this.password = requestDto.getPassword();
         this.commentList = requestDto.getCommentList();
     }
 
     public void update(BoardRequestDto requestDto) {
-        this.author = requestDto.getAuthor();
         this.title = requestDto.getTitle();
         this.contents = requestDto.getContents();
     }

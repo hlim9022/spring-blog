@@ -26,6 +26,11 @@ public class Comment extends Timestamped{
     @JsonIgnore
     private Board board;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "USER_ID")
+    @JsonIgnore
+    private User user;
+
     public Comment(String comment, Board board) {
         this.comment = comment;
         this.board = board;
