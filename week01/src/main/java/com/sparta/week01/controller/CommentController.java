@@ -27,9 +27,8 @@ public class CommentController {
     public ResponseDto<?> addComments(@PathVariable(name = "id") Long boardId,
                                       @RequestBody CommentDto commentDto,
                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        Long userId = userDetails.getUserId();
-
-        return commentService.addComments(boardId, commentDto, userId);
+        String username = userDetails.getUsername();
+        return commentService.addComments(boardId, commentDto, username);
     }
 
 
@@ -39,9 +38,8 @@ public class CommentController {
                                         @PathVariable(name = "commentId") Long commentId,
                                         @RequestBody CommentDto commentDto,
                                         @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        Long userId = userDetails.getUserId();
-
-        return commentService.updateComment(boardId, commentId, userId, commentDto);
+        String username = userDetails.getUsername();
+        return commentService.updateComment(boardId, commentId, commentDto, username);
     }
 
 
@@ -50,7 +48,8 @@ public class CommentController {
     public ResponseDto<?> deleteComment(@PathVariable(name = "id") Long boardId,
                                         @PathVariable(name = "commentId") Long commentId,
                                         @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return commentService.removeComment(boardId, commentId);
+        String username = userDetails.getUsername();
+        return commentService.removeComment(boardId, commentId, username);
     }
 
 

@@ -11,9 +11,7 @@ public interface ShowAllBoardList {
     String getTitle();
 
     String getContent();
-
-    List<Comment> getCommentList();
-
+    
     User getUser();
 }
 

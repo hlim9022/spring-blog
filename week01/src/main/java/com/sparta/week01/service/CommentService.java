@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -33,52 +35,79 @@ public class CommentService {
 
     // 댓글 작성
     @Transactional
-    public ResponseDto<?> addComments(Long boardId, CommentDto commentDto, Long userId) {
+    public ResponseDto<?> addComments(Long boardId, CommentDto commentDto, String username) {
 
         //boardId 값으로 게시글을 찾는다
-        Board foundBoard = boardRepository.findById(boardId).orElseThrow(
-                () -> new NullPointerException("찾으시는 게시글이 없습니다.")
-        );
+        Optional<Board> checkBoard = boardRepository.findById(boardId);
+        User foundUser = userRepository.findByUsername(username);
 
-
-        Comment saveComment = commentRepository.save(new Comment(commentDto.getComment(), foundBoard));
-
-        foundBoard.addComment(saveComment);
-        System.out.println(foundBoard);
-
-        return ResponseDto.success(saveComment);
+        if(checkBoard.isPresent()) {
+            Board foundBoard = checkBoard.get();
+            commentDto.setUser(foundUser);
+            commentDto.setBoard(foundBoard);
+            Comment saveComment = commentRepository.save(new Comment(commentDto,foundBoard,foundUser));
+            foundBoard.addComment(saveComment);
+            return ResponseDto.success(saveComment);
+        } else {
+            return ResponseDto.fail("NULL_POST_ID", "해당 게시글은 존재하지 않는 게시글입니다.");
+        }
     }
 
     // 댓글 수정
     @Transactional
-    public ResponseDto<?> updateComment(Long boardId, Long commentId, Long userId, CommentDto commentDto) {
+    public ResponseDto<?> updateComment(Long boardId, Long commentId, CommentDto commentDto, String username) {
 
-        List<Comment> commentList = getCommentList(boardId);
+        User foundUser = userRepository.findByUsername(username);
+        //게시글 있는지 확인을 위해 객체생성
+        Optional<Board> checkBoard = boardRepository.findById(boardId);
+        Comment foundComment;
 
-        // 댓글리스트 중에 수정을 원하는 특정 댓글, 댓글리스트에서 찾을 때는 인덱스값을 사용했기 때문에 commentId - 1
-        try {
-            Comment foundComment = commentList.get(commentId.intValue()-1);
+        if(checkBoard.isPresent()) {
+            List<Comment> commentList = checkBoard.get().getCommentList();
+            // 댓글리스트 중에 수정을 원하는 특정 댓글, 댓글리스트에서 찾을 때는 인덱스값을 사용했기 때문에 commentId - 1
+            try {
+                foundComment = commentList.get(commentId.intValue()-1);
+            } catch (IndexOutOfBoundsException e) {
+                return ResponseDto.fail("NULL_POST_ID", "존재하지 않는 댓글입니다.");
+            }
 
-            // 댓글 내용 수정
-            foundComment.update(commentDto.getComment());
-            return ResponseDto.success(foundComment);
-        } catch (IndexOutOfBoundsException e) {
-            return ResponseDto.fail("NULL_POST_ID", "post id isn't exist");
+
+            //수정할 댓글의 작성자가 맞는지 확인
+            if(Objects.equals(foundUser.getId(), foundComment.getUser().getId())) {
+                foundComment.update(commentDto,checkBoard.get(),foundUser);
+                return ResponseDto.success(foundComment);
+            } else {
+                return ResponseDto.fail("UNAUTHORIZED", "수정권한이 없습니다.");
+            }
         }
+        return ResponseDto.fail("NULL_POST_ID", "해당 게시글은 존재하지 않는 게시글입니다.");
     }
 
 
     // 댓글 삭제
     @Transactional
-    public ResponseDto<?> removeComment(Long boardId, Long commentId) {
+    public ResponseDto<?> removeComment(Long boardId, Long commentId, String username) {
 
+        List<Comment> commentList = getCommentList(boardId);
+        Comment foundComment;
+
+        // 댓글리스트 중에 삭제를 원하는 특정 댓글, 댓글리스트에서 찾을 때는 인덱스값을 사용했기 때문에 commentId - 1
         try {
-            commentRepository.deleteById(commentId);
-        } catch (Exception e) {
-            return ResponseDto.fail("NULL_POST_ID", "post id isn't exist");
+            foundComment = commentList.get(commentId.intValue()-1);
+        } catch (IndexOutOfBoundsException e) {
+            return ResponseDto.fail("NULL_POST_ID", "해당 게시글은 존재하지 않는 게시글입니다.");
         }
 
-        return ResponseDto.success("success");
+        User foundUser = userRepository.findByUsername(username);
+
+
+        //삭제할 댓글의 작성자가 맞는지 확인
+        if(Objects.equals(foundUser.getId(), foundComment.getUser().getId())) {
+            commentRepository.deleteById(commentId);
+            return ResponseDto.success(foundComment);
+        } else {
+            return ResponseDto.fail("UNAUTHORIZED", "삭제권한이 없습니다.");
+        }
     }
 
 
@@ -90,7 +119,6 @@ public class CommentService {
         );
 
         // 찾은 게시글의 댓글리스트
-        List<Comment> commentList = commentRepository.findAllByBoard(foundBoard);
-        return commentList;
+        return commentRepository.findAllByBoard(foundBoard);
     }
 }
