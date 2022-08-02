@@ -52,7 +52,7 @@ public class BoardService {
                 board.update(requestDto, foundUser);
                 return ResponseDto.success(board);
             } else {
-                return ResponseDto.fail("UNAUTHORIZED", "수정권한이 없습니다.");
+                return ResponseDto.fail("UNAUTHORIZED", "작성자만 수정할 수 있습니다.");
             }
         }
         return ResponseDto.fail("NULL_POST_ID", "해당 게시글은 존재하지 않는 게시글입니다.");
@@ -80,7 +80,7 @@ public class BoardService {
                 boardRepository.deleteById(id);
                 return ResponseDto.success("delete success");
             } else {
-                return ResponseDto.fail("UNAUTHORIZED", "삭제권한이 없습니다.");
+                return ResponseDto.fail("UNAUTHORIZED", "작성자만 삭제할 수 있습니다.");
             }
         }
         return ResponseDto.fail("NULL_POST_ID", "해당 게시글은 존재하지 않는 게시글입니다.");

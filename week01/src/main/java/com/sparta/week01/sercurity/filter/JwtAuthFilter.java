@@ -24,6 +24,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Date;
 
 /*
@@ -47,8 +48,8 @@ public class JwtAuthFilter extends BasicAuthenticationFilter {
         System.out.println(jwtInHeader);
 
         if(jwtInHeader == null || !jwtInHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
+
             chain.doFilter(request,response);
-            ResponseDto.fail("Invalid Token", "Token이 유효하지 않습니다.");
             return;
         }
 
@@ -57,14 +58,15 @@ public class JwtAuthFilter extends BasicAuthenticationFilter {
 
         // Algorithm과 secret key를 제공하여 복호화하는 메소드실행
         DecodedJWT decodedJWT = decodeJwt(jwtToken);
+        String username = decodedJWT.getClaim("USERNAME").asString();
 
         Date expireDate = decodedJWT.getClaim("EXPIRATION_TIME").asDate();
         Date now = new Date();
         if(expireDate.before(now)) {
+
             ResponseDto.fail("Invalid Token", "Token이 유효하지 않습니다.");
         }
 
-        String username = decodedJWT.getClaim("USERNAME").asString();
 
 
         System.out.println("---------- 검증시작 -----------------");

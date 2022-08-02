@@ -9,7 +9,6 @@ import com.sparta.week01.repository.BoardRepository;
 import com.sparta.week01.repository.CommentRepository;
 import com.sparta.week01.repository.UserRepository;
 import lombok.AllArgsConstructor;
-import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -29,8 +28,13 @@ public class CommentService {
     // 댓글 전체 조회(권한 필요X)
     @Transactional
     public ResponseDto<?> getAllComments(Long boardId) {
-        List<Comment> commentList = getCommentList(boardId);
-        return ResponseDto.success(commentList);
+        Optional<Board> foundBoard = boardRepository.findById(boardId);
+        if(foundBoard.isPresent()) {
+            List<Comment> commentList = foundBoard.get().getCommentList();
+            return ResponseDto.success(commentList);
+        } else {
+            return ResponseDto.fail("NULL_POST_ID", "해당 게시글은 존재하지 않는 게시글입니다.");
+        }
     }
 
     // 댓글 작성
@@ -71,54 +75,41 @@ public class CommentService {
                 return ResponseDto.fail("NULL_POST_ID", "존재하지 않는 댓글입니다.");
             }
 
-
             //수정할 댓글의 작성자가 맞는지 확인
             if(Objects.equals(foundUser.getId(), foundComment.getUser().getId())) {
                 foundComment.update(commentDto,checkBoard.get(),foundUser);
                 return ResponseDto.success(foundComment);
             } else {
-                return ResponseDto.fail("UNAUTHORIZED", "수정권한이 없습니다.");
+                return ResponseDto.fail("UNAUTHORIZED", "작성자만 수정할 수 있습니다.");
             }
         }
-        return ResponseDto.fail("NULL_POST_ID", "해당 게시글은 존재하지 않는 게시글입니다.");
+        return ResponseDto.fail("NULL_POST_ID", "해당 게시글은 존재하지 않습니다.");
     }
 
 
     // 댓글 삭제
     @Transactional
     public ResponseDto<?> removeComment(Long boardId, Long commentId, String username) {
-
-        List<Comment> commentList = getCommentList(boardId);
+        Optional<Board> foundBoard = boardRepository.findById(boardId);
         Comment foundComment;
 
-        // 댓글리스트 중에 삭제를 원하는 특정 댓글, 댓글리스트에서 찾을 때는 인덱스값을 사용했기 때문에 commentId - 1
-        try {
-            foundComment = commentList.get(commentId.intValue()-1);
-        } catch (IndexOutOfBoundsException e) {
-            return ResponseDto.fail("NULL_POST_ID", "해당 게시글은 존재하지 않는 게시글입니다.");
+        if(foundBoard.isPresent()) {
+            try {
+                // 댓글리스트 중에 삭제를 원하는 특정 댓글, 댓글리스트에서 찾을 때는 인덱스값을 사용했기 때문에 commentId - 1
+                foundComment = foundBoard.get().getCommentList().get(commentId.intValue()-1);
+            } catch (IndexOutOfBoundsException e) {
+                return ResponseDto.fail("NULL_POST_ID", "존재하지 않는 댓글입니다.");
+            }
+            User foundUser = userRepository.findByUsername(username);
+
+            //삭제할 댓글의 작성자가 맞는지 확인
+            if(Objects.equals(foundUser.getId(), foundComment.getUser().getId())) {
+                commentRepository.deleteById(commentId);
+                return ResponseDto.success("delete success");
+            } else {
+                return ResponseDto.fail("UNAUTHORIZED", "작성자만 삭제할 수 있습니다.");
+            }
         }
-
-        User foundUser = userRepository.findByUsername(username);
-
-
-        //삭제할 댓글의 작성자가 맞는지 확인
-        if(Objects.equals(foundUser.getId(), foundComment.getUser().getId())) {
-            commentRepository.deleteById(commentId);
-            return ResponseDto.success(foundComment);
-        } else {
-            return ResponseDto.fail("UNAUTHORIZED", "삭제권한이 없습니다.");
-        }
-    }
-
-
-    // 게시글 id를 통해 댓글리스트를 구하는 method
-    private List<Comment> getCommentList(Long boardId) {
-        // 게시글 찾기
-        Board foundBoard = boardRepository.findById(boardId).orElseThrow(
-                () -> new NullPointerException("찾으시는 게시글이 없습니다.")
-        );
-
-        // 찾은 게시글의 댓글리스트
-        return commentRepository.findAllByBoard(foundBoard);
+        return ResponseDto.fail("NULL_POST_ID", "해당 게시글은 존재하지 않는 게시글입니다.");
     }
 }

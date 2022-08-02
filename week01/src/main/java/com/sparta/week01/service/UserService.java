@@ -45,12 +45,12 @@ public class UserService {
                         "비밀번호와 비밀번호확인이 일치하지 않습니다.");
             } else if(!pwLen) {
                 return ResponseDto.fail("PASSWORD WRONG FORMAT",
-                        "4-32 characters consisting of lowercase letters(a-z) or numbers");
+                        "4-32자의 영문 소문자, 숫자만 사용 가능합니다.");
             }
 
         }
         return ResponseDto.fail("NICKNAME WRONG FORMAT",
-                "4-12 characters consisting of uppercase letters(A-Z), lowercase letters(a-z), or numbers");
+                "4-12자의 영문 대문자,소문자, 숫자만 사용 가능합니다.");
     }
 
     private boolean usernameDupCheck(String username) {
