@@ -2,6 +2,7 @@ package com.sparta.week01.dto;
 
 
 import com.sparta.week01.domain.Comment;
+import com.sparta.week01.domain.User;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -13,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BoardRequestDto {
     private String title;
-    private String contents;
+    private String content;
+    private User user;
     private List<Comment> commentList;
 }

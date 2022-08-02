@@ -2,9 +2,8 @@ package com.sparta.week01.sercurity.config;
 
 import com.sparta.week01.repository.UserRepository;
 import com.sparta.week01.sercurity.LoginSuccessHandler;
-import com.sparta.week01.sercurity.filter.KellyCustomJwtAuthFilter;
+import com.sparta.week01.sercurity.filter.JwtAuthFilter;
 import com.sparta.week01.sercurity.filter.LoginFilter;
-import com.sparta.week01.sercurity.provider.JwtProvider;
 import com.sparta.week01.sercurity.provider.LoginAuthProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -16,9 +15,7 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.CorsFilter;
 
@@ -44,7 +41,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(AuthenticationManagerBuilder auth) {
         auth
                 .authenticationProvider(loginAuthProvider());
-//                .authenticationProvider(jwtProvider);
     }
 
     @Bean
@@ -81,7 +77,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .addFilter(corsFilter)
                 .addFilterBefore(loginFilter(), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new KellyCustomJwtAuthFilter(authenticationManager(),userRepository), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthFilter(authenticationManager(),userRepository), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
                 .formLogin().disable()

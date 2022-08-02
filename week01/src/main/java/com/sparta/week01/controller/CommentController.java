@@ -3,8 +3,10 @@ package com.sparta.week01.controller;
 
 import com.sparta.week01.dto.CommentDto;
 import com.sparta.week01.dto.ResponseDto;
+import com.sparta.week01.sercurity.UserDetailsImpl;
 import com.sparta.week01.service.CommentService;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,9 +25,11 @@ public class CommentController {
     // 댓글 작성(권한 필요)
     @PostMapping("/auth/list/{id}/comments")
     public ResponseDto<?> addComments(@PathVariable(name = "id") Long boardId,
-                                      @RequestBody CommentDto commentDto) {
+                                      @RequestBody CommentDto commentDto,
+                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Long userId = userDetails.getUserId();
 
-        return commentService.addComments(boardId, commentDto);
+        return commentService.addComments(boardId, commentDto, userId);
     }
 
 
@@ -33,15 +37,19 @@ public class CommentController {
     @PutMapping("/auth/list/{id}/comments/{commentId}")
     public ResponseDto<?> modifyComment(@PathVariable(name = "id") Long boardId,
                                         @PathVariable(name = "commentId") Long commentId,
-                                        @RequestBody CommentDto commentDto) {
-        return commentService.updateComment(boardId, commentId, commentDto);
+                                        @RequestBody CommentDto commentDto,
+                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Long userId = userDetails.getUserId();
+
+        return commentService.updateComment(boardId, commentId, userId, commentDto);
     }
 
 
     // 댓글 삭제(권한 필요)
     @DeleteMapping("/auth/list/{id}/comments/{commentId}")
     public ResponseDto<?> deleteComment(@PathVariable(name = "id") Long boardId,
-                                        @PathVariable(name = "commentId") Long commentId) {
+                                        @PathVariable(name = "commentId") Long commentId,
+                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return commentService.removeComment(boardId, commentId);
     }
 

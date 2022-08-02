@@ -1,19 +1,17 @@
 package com.sparta.week01.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sparta.week01.dto.UserLoginDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import javax.validation.constraints.Size;
 import java.util.List;
 
-@Entity
-@Table(name = "USERS")
 @Getter
 @NoArgsConstructor
+@Table(name = "USERS")
+@Entity
 public class User extends Timestamped{
 
     @Id
@@ -31,17 +29,11 @@ public class User extends Timestamped{
     @Transient
     private String passwordConfirm;
 
-
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Transient
-    @Column(name = "REFRESH_TOKEN")
-    private String refreshToken;
-
-    @OneToMany
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Board> boardList;
 
-    @OneToMany
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Comment> commentList;
 

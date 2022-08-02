@@ -2,10 +2,12 @@ package com.sparta.week01.service;
 
 import com.sparta.week01.domain.Board;
 import com.sparta.week01.domain.Comment;
+import com.sparta.week01.domain.User;
 import com.sparta.week01.dto.CommentDto;
 import com.sparta.week01.dto.ResponseDto;
 import com.sparta.week01.repository.BoardRepository;
 import com.sparta.week01.repository.CommentRepository;
+import com.sparta.week01.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,8 @@ public class CommentService {
     private final BoardRepository boardRepository;
     private final CommentRepository commentRepository;
 
+    private final UserRepository userRepository;
+
     // 댓글 전체 조회(권한 필요X)
     @Transactional
     public ResponseDto<?> getAllComments(Long boardId) {
@@ -29,12 +33,13 @@ public class CommentService {
 
     // 댓글 작성
     @Transactional
-    public ResponseDto<?> addComments(Long boardId, CommentDto commentDto) {
+    public ResponseDto<?> addComments(Long boardId, CommentDto commentDto, Long userId) {
 
         //boardId 값으로 게시글을 찾는다
         Board foundBoard = boardRepository.findById(boardId).orElseThrow(
                 () -> new NullPointerException("찾으시는 게시글이 없습니다.")
         );
+
 
         Comment saveComment = commentRepository.save(new Comment(commentDto.getComment(), foundBoard));
 
@@ -44,10 +49,9 @@ public class CommentService {
         return ResponseDto.success(saveComment);
     }
 
-
     // 댓글 수정
     @Transactional
-    public ResponseDto<?> updateComment(Long boardId, Long commentId, CommentDto commentDto) {
+    public ResponseDto<?> updateComment(Long boardId, Long commentId, Long userId, CommentDto commentDto) {
 
         List<Comment> commentList = getCommentList(boardId);
 

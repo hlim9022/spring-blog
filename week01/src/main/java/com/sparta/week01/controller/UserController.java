@@ -1,7 +1,6 @@
 package com.sparta.week01.controller;
 
 import com.sparta.week01.dto.ResponseDto;
-import com.sparta.week01.dto.UserLoginDto;
 import com.sparta.week01.dto.UserSignupDto;
 import com.sparta.week01.service.UserService;
 import lombok.AllArgsConstructor;

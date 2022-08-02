@@ -7,10 +7,10 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
-@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Entity
 public class Comment extends Timestamped{
 
     @Id
@@ -21,14 +21,12 @@ public class Comment extends Timestamped{
     @Column(name = "comment", nullable = false)
     private String comment;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "BOARD_ID")
-    @JsonIgnore
     private Board board;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "USER_ID")
-    @JsonIgnore
     private User user;
 
     public Comment(String comment, Board board) {
@@ -40,3 +38,4 @@ public class Comment extends Timestamped{
         this.comment = comment;
     }
 }
+

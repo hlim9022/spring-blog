@@ -10,12 +10,18 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class UserDetailsImpl implements UserDetails {
 
-    private final User user;
+    private User user;
 
+    public UserDetailsImpl(User user) {
+        this.user = user;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;
+    }
+    public Long getUserId() {
+        return user.getId();
     }
 
     @Override

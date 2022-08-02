@@ -41,9 +41,13 @@ public class LoginAuthProvider implements AuthenticationProvider {
         //UserDetailsService를 통해 DB에서 username으로 사용자 조회
         UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(username);
 
-        // 인증실패시
-        if(!passwordEncoder.matches(password,userDetails.getPassword())) {
-            throw new BadCredentialsException(userDetails.getUsername() + " Invalid password");
+        /*
+            처음 패스워드를 통한 로그인시
+         */
+        if(password != null) {
+            if(!passwordEncoder.matches(password,userDetails.getPassword())) {
+                throw new BadCredentialsException(userDetails.getUsername() + " Invalid password");
+            }
         }
 
         //인증성공시 -> LoginSuccessHandler 가 호출!

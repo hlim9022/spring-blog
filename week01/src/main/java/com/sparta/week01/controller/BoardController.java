@@ -27,7 +27,9 @@ public class BoardController {
     @PostMapping("/auth/list")
     public ResponseDto<?> createBlog(@RequestBody BoardRequestDto requestDto,
                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return boardService.createBlog(requestDto);
+
+        String username = userDetails.getUsername();
+        return boardService.createBlog(requestDto, username);
     }
 
     //글 상세조회
@@ -42,7 +44,8 @@ public class BoardController {
     public ResponseDto<?> modifyBlog(@PathVariable Long id,
                                      @RequestBody BoardRequestDto requestDto,
                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return boardService.modifyPost(id, requestDto);
+        String username = userDetails.getUsername();
+        return boardService.modifyPost(id, requestDto, username);
     }
 
 
@@ -50,7 +53,9 @@ public class BoardController {
     @DeleteMapping("/auth/list/{id}")
     public ResponseDto<?> deleteBlog(@PathVariable Long id,
                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return boardService.deletePost(id);
+        String username = userDetails.getUsername();
+        System.out.println("게시글 삭제");
+        return boardService.deletePost(id,username);
     }
 
 }

@@ -29,12 +29,12 @@ import java.util.Date;
 /*
     API요청 Header에 전달되는 JWT토큰 유효성 검사(인증)
  */
-public class KellyCustomJwtAuthFilter extends BasicAuthenticationFilter {
+public class JwtAuthFilter extends BasicAuthenticationFilter {
 
 
     private final UserRepository userRepository;
 
-    public KellyCustomJwtAuthFilter(AuthenticationManager authenticationManager, UserRepository userRepository) {
+    public JwtAuthFilter(AuthenticationManager authenticationManager, UserRepository userRepository) {
         super(authenticationManager);
         this.userRepository = userRepository;
     }
@@ -46,7 +46,7 @@ public class KellyCustomJwtAuthFilter extends BasicAuthenticationFilter {
         String jwtInHeader = request.getHeader(JwtProperties.AUTH_HEADER);
         System.out.println(jwtInHeader);
 
-        if(jwtInHeader == null || jwtInHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
+        if(jwtInHeader == null || !jwtInHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
             chain.doFilter(request,response);
             ResponseDto.fail("Invalid Token", "Token이 유효하지 않습니다.");
             return;
@@ -74,20 +74,16 @@ public class KellyCustomJwtAuthFilter extends BasicAuthenticationFilter {
             User userEntity = userRepository.findByUsername(username);
             UserDetailsImpl userDetails = new UserDetailsImpl(userEntity);
 
-            System.out.println("---------- 토큰으로 강제로그인 시작 -----------------");
             //강제로 authentication을 만들어 로그인을 시켜줘야함
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(userDetails, null);
 
             // 강제로 security의 session에 접근하여 authentication객체 저장
             SecurityContextHolder.getContext().setAuthentication(authentication); // 저장할 수 있는 session공간을 찾음
-            System.out.println("---------- 강제로그인 완료 -----------------");
+            System.out.println("---------- 검증완료 -----------------");
 
             chain.doFilter(request, response);
         }
-        ResponseDto.fail("Invalid Token", "Token이 유효하지 않습니다.");
-
-
     }
 
     private DecodedJWT decodeJwt(String jwtToken) {
