@@ -1,7 +1,10 @@
 package com.sparta.week01.sercurity;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sparta.week01.domain.User;
 import com.sparta.week01.dto.ResponseDto;
 import com.sparta.week01.repository.UserRepository;
+import com.sparta.week01.sercurity.jwt.JwtProperties;
 import com.sparta.week01.sercurity.jwt.JwtTokenUtils;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +23,7 @@ import java.io.IOException;
 @NoArgsConstructor
 public class LoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
-    private static final String TOKEN_PREFIX = "BEARER ";
-    private static final String AUTH_HEADER = "Authorization";
-
     private UserRepository userRepository;
-
     @Autowired
     public LoginSuccessHandler(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -36,17 +35,18 @@ public class LoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessH
                                         HttpServletResponse response,
                                         Authentication authentication) throws ServletException, IOException {
 
+        System.out.println("==============LoginSuccessHandler > onAuthenticationSuccess================");
         // authentication.getPrincipal() 실행하면 UserDetails를 구현한 사용자 객체를 반환
         final UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        //Token 생성
+        //AccessToken 생성
         final String accessJwtToken = JwtTokenUtils.generateACJwtToken(userDetails);
-        System.out.println("access 토큰생성 및 로그인 완료");
+
+        //RefreshToken 생성
+        final String refreshJwtToken = JwtTokenUtils.generateREJwtToken(userDetails);
 
 
-
-
-        response.addHeader(AUTH_HEADER, TOKEN_PREFIX + accessJwtToken);
-
+        response.addHeader(JwtProperties.AUTH_HEADER, JwtProperties.TOKEN_PREFIX + accessJwtToken);
+        response.addHeader(JwtProperties.REFRESH_HEADER, JwtProperties.TOKEN_PREFIX + refreshJwtToken);
     }
 }

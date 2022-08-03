@@ -17,7 +17,7 @@ import java.io.IOException;
     JSON형태로 HttpServletRequest를 통해 들어온 아이디와 패스워드 정보를 넣어
     UsernamePaswwordAuthenticationToken을 생성.
 
-    -> 1) 이 Filter를 통해 필요한 정볼르 적합한 클래스 형태(Authentication)로 만들어
+    -> 1) 이 Filter를 통해 필요한 정보를 적합한 클래스 형태(Authentication)로 만들어
        2) Spring Security에 인증 요청
  */
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
@@ -34,6 +34,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
                                                 HttpServletResponse response) throws AuthenticationException {
+        System.out.println("==============LoginFilter > attemptAuthentication================");
         UsernamePasswordAuthenticationToken authenticationToken;
 
         try {

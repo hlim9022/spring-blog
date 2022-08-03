@@ -4,10 +4,7 @@ import com.sparta.week01.dto.ResponseDto;
 import com.sparta.week01.dto.UserSignupDto;
 import com.sparta.week01.service.UserService;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/blog/members")
@@ -21,5 +18,6 @@ public class UserController {
         System.out.println("가입시작");
         return userService.join(userSignupDto);
     }
+
 
 }

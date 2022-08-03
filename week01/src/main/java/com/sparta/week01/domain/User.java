@@ -1,6 +1,7 @@
 package com.sparta.week01.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sparta.week01.dto.UserLoginDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,6 +29,14 @@ public class User extends Timestamped{
     @JsonIgnore
     @Transient
     private String passwordConfirm;
+
+    @JsonIgnore
+    private String refreshToken;
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     @JsonIgnore

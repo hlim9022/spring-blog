@@ -30,7 +30,7 @@ public class LoginAuthProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-
+        System.out.println("==============LoginAuthProvider > authenticate================");
         //LoginFilter에서 생성된 Token으로부터 ID/PW 조회
         UsernamePasswordAuthenticationToken authenticationToken
                 = (UsernamePasswordAuthenticationToken) authentication;

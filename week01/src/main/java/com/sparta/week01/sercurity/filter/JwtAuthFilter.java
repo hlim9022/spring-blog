@@ -24,7 +24,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Date;
 
 /*
@@ -88,7 +87,10 @@ public class JwtAuthFilter extends BasicAuthenticationFilter {
         }
     }
 
-    private DecodedJWT decodeJwt(String jwtToken) {
+    private DecodedJWT decodeJwt(String jwtInHeader) {
+        // Bearer 제외한 token정보만 추출
+        String jwtToken = jwtInHeader.replace(JwtProperties.TOKEN_PREFIX, "");
+
         DecodedJWT jwt = null;
 
         try{
@@ -100,7 +102,5 @@ public class JwtAuthFilter extends BasicAuthenticationFilter {
             ResponseDto.fail("INVALID TOKEN", "유효한 토큰이 아닙니다.");
         }
         return jwt;
-
-
     }
 }
