@@ -1,5 +1,6 @@
 package com.sparta.week01.dto;
 
+import com.sparta.week01.domain.User;
 import lombok.*;
 
 @Getter
@@ -11,7 +12,7 @@ public class ResponseDto<T> {
 
     @AllArgsConstructor
     @Getter
-    static class Error {
+    public static class Error {
         private String code;
         private String message;
     }

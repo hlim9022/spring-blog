@@ -30,8 +30,12 @@ public class User extends Timestamped{
     @Transient
     private String passwordConfirm;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String refreshToken;
+
+    public String getRefreshToken() {
+        return this.refreshToken;
+    }
 
     public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;

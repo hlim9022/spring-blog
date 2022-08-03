@@ -9,11 +9,14 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.week01.domain.User;
 import com.sparta.week01.dto.ResponseDto;
 import com.sparta.week01.repository.UserRepository;
+import com.sparta.week01.sercurity.LoginSuccessHandler;
 import com.sparta.week01.sercurity.UserDetailsImpl;
 import com.sparta.week01.sercurity.jwt.JwtProperties;
+import com.sparta.week01.sercurity.jwt.JwtTokenUtils;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,7 +34,7 @@ import java.util.Date;
  */
 public class JwtAuthFilter extends BasicAuthenticationFilter {
 
-
+    private ObjectMapper objectMapper = new ObjectMapper();
     private final UserRepository userRepository;
 
     public JwtAuthFilter(AuthenticationManager authenticationManager, UserRepository userRepository) {
@@ -41,13 +44,12 @@ public class JwtAuthFilter extends BasicAuthenticationFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-
+        System.out.println("==============JwtAuthFilter > doFilterInternal================");
         //request Header에 Token값 확인
         String jwtInHeader = request.getHeader(JwtProperties.AUTH_HEADER);
         System.out.println(jwtInHeader);
 
         if(jwtInHeader == null || !jwtInHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
-
             chain.doFilter(request,response);
             return;
         }
@@ -57,13 +59,14 @@ public class JwtAuthFilter extends BasicAuthenticationFilter {
 
         // Algorithm과 secret key를 제공하여 복호화하는 메소드실행
         DecodedJWT decodedJWT = decodeJwt(jwtToken);
-        String username = decodedJWT.getClaim("USERNAME").asString();
 
+        String username = decodedJWT.getClaim("USERNAME").asString();
         Date expireDate = decodedJWT.getClaim("EXPIRATION_TIME").asDate();
         Date now = new Date();
         if(expireDate.before(now)) {
-
-            ResponseDto.fail("Invalid Token", "Token이 유효하지 않습니다.");
+            ResponseDto<?> responseDto = new ResponseDto<>(false, null, new ResponseDto.Error("Invalid Token", "Token이 유효하지 않습니다."));
+            String result = objectMapper.writeValueAsString(responseDto);
+            response.getWriter().write(result);
         }
 
 
@@ -99,8 +102,18 @@ public class JwtAuthFilter extends BasicAuthenticationFilter {
 
             jwt = verifier.verify(jwtToken);
         } catch (Exception e) {
-            ResponseDto.fail("INVALID TOKEN", "유효한 토큰이 아닙니다.");
+            System.out.println(e.getMessage());
         }
         return jwt;
+    }
+
+    private boolean isRefreshValidate(String username) {
+        User checkUser = userRepository.findByUsername(username);
+
+        DecodedJWT decodedRefreshJWT = decodeJwt(checkUser.getRefreshToken());
+
+        Date now = new Date();
+        Date expiresAt = decodedRefreshJWT.getExpiresAt();
+        return !expiresAt.before(now);
     }
 }

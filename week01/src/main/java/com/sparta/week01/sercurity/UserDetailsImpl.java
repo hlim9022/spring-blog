@@ -20,6 +20,10 @@ public class UserDetailsImpl implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;
     }
+
+    public User getUser(){
+        return this.user;
+    }
     public Long getUserId() {
         return user.getId();
     }

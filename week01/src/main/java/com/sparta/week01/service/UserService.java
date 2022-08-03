@@ -5,7 +5,10 @@ import com.sparta.week01.dto.ResponseDto;
 import com.sparta.week01.dto.UserLoginDto;
 import com.sparta.week01.dto.UserSignupDto;
 import com.sparta.week01.repository.UserRepository;
+import com.sparta.week01.sercurity.UserDetailsImpl;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +22,7 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
-    public ResponseDto<?> join(UserSignupDto userSignupDto) {
+    public ResponseEntity<?> join(UserSignupDto userSignupDto) {
         System.out.println(userSignupDto.getPasswordConfirm());
         System.out.println(userSignupDto.getUsername());
 
@@ -27,7 +30,7 @@ public class UserService {
         UserLoginDto userLoginDto = new UserLoginDto();
 
         if(!usernameDupCheck(username)){
-            return ResponseDto.fail("EXIST NICKNAME", "중복된 닉네임입니다.");
+            return new ResponseEntity<>(ResponseDto.fail("EXIST NICKNAME", "중복된 닉네임입니다."),HttpStatus.OK);
         }
 
         if (checkUsername(username)) {
@@ -39,18 +42,18 @@ public class UserService {
                 userLoginDto.setPassword(passwordEncoder.encode(password));
                 userLoginDto.setUsername(userSignupDto.getUsername());
                 User saveUser = userRepository.save(new User(userLoginDto));
-                return ResponseDto.success(saveUser);
+                return new ResponseEntity<>(ResponseDto.success(saveUser), HttpStatus.OK);
             } else if(!password.equals(passwordConfirm)){
-                return ResponseDto.fail("PASSWORD MISMATCH",
-                        "비밀번호와 비밀번호확인이 일치하지 않습니다.");
+                return new ResponseEntity<>(ResponseDto.fail("PASSWORD MISMATCH",
+                        "비밀번호와 비밀번호확인이 일치하지 않습니다."),HttpStatus.OK);
             } else if(!pwLen) {
-                return ResponseDto.fail("PASSWORD WRONG FORMAT",
-                        "4-32자의 영문 소문자, 숫자만 사용 가능합니다.");
+                return new ResponseEntity<>(ResponseDto.fail("PASSWORD WRONG FORMAT",
+                        "4-32자의 영문 소문자, 숫자만 사용 가능합니다."),HttpStatus.OK);
             }
 
         }
-        return ResponseDto.fail("NICKNAME WRONG FORMAT",
-                "4-12자의 영문 대문자,소문자, 숫자만 사용 가능합니다.");
+        return new ResponseEntity<>(ResponseDto.fail("NICKNAME WRONG FORMAT",
+                "4-12자의 영문 대문자,소문자, 숫자만 사용 가능합니다."),HttpStatus.OK);
     }
 
     private boolean usernameDupCheck(String username) {
@@ -97,4 +100,7 @@ public class UserService {
     }
 
 
+    public User getUserInfo(UserDetailsImpl userDetails) {
+        return userRepository.findByUsername(userDetails.getUsername());
+    }
 }

@@ -8,6 +8,8 @@ import com.sparta.week01.dto.ResponseDto;
 import com.sparta.week01.repository.BoardRepository;
 import com.sparta.week01.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -24,23 +26,23 @@ public class BoardService {
 
     //블로그 전체 리스트 조회
     @Transactional
-    public ResponseDto<?> getAllBlogList() {
+    public ResponseEntity<?> getAllBlogList() {
         List<ShowAllBoardList> boardList = boardRepository.findAllByOrderByCreatedAtDesc();
-        return ResponseDto.success(boardList);
+        return new ResponseEntity<>(ResponseDto.success(boardList),HttpStatus.OK);
     }
 
     //블로그 글작성
     @Transactional
-    public ResponseDto<?> createBlog(BoardRequestDto requestDto, String username) {
+    public ResponseEntity<?> createBlog(BoardRequestDto requestDto, String username) {
         User foundUser = userRepository.findByUsername(username);
         requestDto.setUser(foundUser);
         Board addBoard = boardRepository.save(new Board(requestDto, foundUser));
-        return ResponseDto.success(addBoard);
+        return new ResponseEntity<>(ResponseDto.success(addBoard),HttpStatus.OK);
     }
 
 
     @Transactional
-    public ResponseDto<?> modifyPost(Long id, BoardRequestDto requestDto, String username) {
+    public ResponseEntity<?> modifyPost(Long id, BoardRequestDto requestDto, String username) {
         User foundUser = userRepository.findByUsername(username);
         Optional<Board> checkBoard = boardRepository.findById(id);
 
@@ -50,39 +52,39 @@ public class BoardService {
                 Board board = checkBoard.get();
 
                 board.update(requestDto, foundUser);
-                return ResponseDto.success(board);
+                return new ResponseEntity<>(ResponseDto.success(board), HttpStatus.OK);
             } else {
-                return ResponseDto.fail("UNAUTHORIZED", "작성자만 수정할 수 있습니다.");
+                return new ResponseEntity<>(ResponseDto.fail("UNAUTHORIZED", "작성자만 수정할 수 있습니다."),HttpStatus.UNAUTHORIZED);
             }
         }
-        return ResponseDto.fail("NULL_POST_ID", "해당 게시글은 존재하지 않는 게시글입니다.");
+        return new ResponseEntity<>(ResponseDto.fail("NULL_POST_ID", "해당 게시글은 존재하지 않는 게시글입니다."),HttpStatus.NOT_FOUND);
     }
 
 
     @Transactional
-    public ResponseDto<?> getOnePost(Long id) {
+    public ResponseEntity<?> getOnePost(Long id) {
         Optional<Board> foundBoard = boardRepository.findById(id);
 
         if(foundBoard.isPresent()) {
-            return ResponseDto.success(foundBoard);
+            return new ResponseEntity<>(ResponseDto.success(foundBoard),HttpStatus.OK);
         } else {
-            return ResponseDto.fail("NULL_POST_ID", "해당 게시글은 존재하지 않는 게시글입니다.");
+            return new ResponseEntity<>(ResponseDto.fail("NULL_POST_ID", "해당 게시글은 존재하지 않는 게시글입니다."), HttpStatus.NOT_FOUND);
         }
     }
 
     @Transactional
-    public ResponseDto<?> deletePost(Long id, String username) {
+    public ResponseEntity<?> deletePost(Long id, String username) {
         User foundUser = userRepository.findByUsername(username);
         Optional<Board> foundBoard = boardRepository.findById(id);
 
         if (foundBoard.isPresent()) {
             if (Objects.equals(foundUser.getId(), foundBoard.get().getUser().getId())) {
                 boardRepository.deleteById(id);
-                return ResponseDto.success("delete success");
+                return new ResponseEntity<>(ResponseDto.success("delete success"),HttpStatus.OK);
             } else {
-                return ResponseDto.fail("UNAUTHORIZED", "작성자만 삭제할 수 있습니다.");
+                return new ResponseEntity<>(ResponseDto.fail("UNAUTHORIZED", "작성자만 삭제할 수 있습니다."),HttpStatus.UNAUTHORIZED);
             }
         }
-        return ResponseDto.fail("NULL_POST_ID", "해당 게시글은 존재하지 않는 게시글입니다.");
+        return new ResponseEntity<>(ResponseDto.fail("NULL_POST_ID", "해당 게시글은 존재하지 않는 게시글입니다."), HttpStatus.NOT_FOUND);
     }
 }
