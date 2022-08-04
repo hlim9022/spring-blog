@@ -1,4 +1,4 @@
-package com.sparta.week01.domain;
+package com.sparta.week01.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sparta.week01.dto.CommentDto;
@@ -19,7 +19,7 @@ public class Comment extends Timestamped{
     @Column(name = "COMMENT_ID")
     private Long id;
 
-    @Column(name = "comment", nullable = false)
+    @Column(name = "COMMENT", nullable = false)
     private String comment;
 
     @Column(nullable = false)

@@ -1,6 +1,5 @@
 package com.sparta.week01.dto;
 
-import com.sparta.week01.domain.User;
 import lombok.*;
 
 @Getter

@@ -1,18 +1,28 @@
 package com.sparta.week01.service;
 
-import com.sparta.week01.domain.User;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.sparta.week01.dto.ResponseDto;
+import com.sparta.week01.dto.TokenDto;
 import com.sparta.week01.dto.UserLoginDto;
 import com.sparta.week01.dto.UserSignupDto;
+import com.sparta.week01.entity.User;
 import com.sparta.week01.repository.UserRepository;
 import com.sparta.week01.sercurity.UserDetailsImpl;
+import com.sparta.week01.sercurity.jwt.JwtProperties;
+import com.sparta.week01.sercurity.jwt.JwtTokenUtils;
 import lombok.AllArgsConstructor;
+import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -20,19 +30,22 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final UserDetailsService userDetailsService;
 
+
+    //회원가입
     @Transactional
     public ResponseEntity<?> join(UserSignupDto userSignupDto) {
-        System.out.println(userSignupDto.getPasswordConfirm());
-        System.out.println(userSignupDto.getUsername());
-
         String username = userSignupDto.getUsername();
         UserLoginDto userLoginDto = new UserLoginDto();
 
+
+        // username 중복체크
         if(!usernameDupCheck(username)){
             return new ResponseEntity<>(ResponseDto.fail("EXIST NICKNAME", "중복된 닉네임입니다."),HttpStatus.OK);
         }
 
+        // username validation check
         if (checkUsername(username)) {
             String password = userSignupDto.getPassword();
             boolean pwLen = checkPassword(password);
@@ -46,35 +59,20 @@ public class UserService {
             } else if(!password.equals(passwordConfirm)){
                 return new ResponseEntity<>(ResponseDto.fail("PASSWORD MISMATCH",
                         "비밀번호와 비밀번호확인이 일치하지 않습니다."),HttpStatus.OK);
-            } else if(!pwLen) {
+            } else {
                 return new ResponseEntity<>(ResponseDto.fail("PASSWORD WRONG FORMAT",
                         "4-32자의 영문 소문자, 숫자만 사용 가능합니다."),HttpStatus.OK);
             }
-
         }
         return new ResponseEntity<>(ResponseDto.fail("NICKNAME WRONG FORMAT",
                 "4-12자의 영문 대문자,소문자, 숫자만 사용 가능합니다."),HttpStatus.OK);
     }
 
+
+    // username 중복체크 method
     private boolean usernameDupCheck(String username) {
         User foundUser = userRepository.findByUsername(username);
         return foundUser == null;
-    }
-
-    // password validation
-    private boolean checkPassword(String password) {
-        char[] chList = password.toCharArray();
-        if(chList.length < 4 || chList.length > 32) {
-            return false;
-        }
-
-        for(char ch : chList) {
-            if(!((ch >= 'a' && ch <= 'z') ||
-                    (ch >= '0' && ch <= '9'))) {
-                return false;
-            }
-        }
-        return true;
     }
 
     // username validation
@@ -99,8 +97,55 @@ public class UserService {
         return true;
     }
 
+    // password validation check method
+    private boolean checkPassword(String password) {
+        char[] chList = password.toCharArray();
+        if(chList.length < 4 || chList.length > 32) {
+            return false;
+        }
 
-    public User getUserInfo(UserDetailsImpl userDetails) {
-        return userRepository.findByUsername(userDetails.getUsername());
+        for(char ch : chList) {
+            if(!((ch >= 'a' && ch <= 'z') ||
+                    (ch >= '0' && ch <= '9'))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    @Transactional
+    public ResponseEntity<?> reissueTokens(TokenDto tokenDto) {
+        // Token Prefix 제거
+        String accessToken = tokenDto.getAccessToken().substring(7);
+        String refreshToken = tokenDto.getRefreshToken().substring(7);
+
+        // access token 디코드해서 username 확인
+        JWTVerifier verifier = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET_KEY)).build();
+        DecodedJWT verify = verifier.verify(accessToken);
+        String username = verify.getClaim("USERNAME").asString();
+
+        // userRepository에서 User정보 찾고, refresh Token 비교
+        User foundUser = userRepository.findByUsername(username);
+        UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(username);
+        if (Objects.equals(foundUser.getRefreshToken(), refreshToken)) {
+            TokenDto responseTokenDto = new TokenDto();
+            responseTokenDto.setAccessToken(JwtProperties.TOKEN_PREFIX + JwtTokenUtils.generateACJwtToken(userDetails));
+            responseTokenDto.setRefreshToken(JwtProperties.TOKEN_PREFIX + JwtTokenUtils.generateREJwtToken(userDetails));
+
+            //refresh Token은 새로 발급한 것으로 DB데이터 수정
+            foundUser.setRefreshToken(refreshToken);
+            return new ResponseEntity<>(ResponseDto.success(responseTokenDto), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(ResponseDto.fail("INVALID TOKEN", "유효하지 않은 토큰입니다. 다시 로그인해주세요."),
+                    HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<?> logout(UserDetailsImpl userDetails) {
+        User logoutUser = userDetails.getUser();
+        logoutUser.setRefreshToken(null);
+        return new ResponseEntity<>(ResponseDto.success("로그아웃되었습니다."), HttpStatus.OK);
     }
 }

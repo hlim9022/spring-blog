@@ -1,6 +1,6 @@
 package com.sparta.week01.sercurity;
 
-import com.sparta.week01.domain.User;
+import com.sparta.week01.entity.User;
 import com.sparta.week01.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,7 +16,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        System.out.println("==============UserDetailsServiceImpl > loadUserByUsername================");
         User user = userRepository.findByUsername(username);
         return new UserDetailsImpl(user);
     }

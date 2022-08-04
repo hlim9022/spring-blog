@@ -1,4 +1,4 @@
-package com.sparta.week01.domain;
+package com.sparta.week01.entity;
 
 import java.time.LocalDateTime;
 

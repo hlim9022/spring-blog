@@ -1,6 +1,7 @@
-package com.sparta.week01.sercurity.provider;
+package com.sparta.week01.sercurity.exception.provider;
 
 import com.sparta.week01.sercurity.UserDetailsImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,20 +18,15 @@ import javax.annotation.Resource;
 
     -> Client에서 전달한 ID/PW가 DB의 ID/PW와 일치하는지 인증
  */
-
+@RequiredArgsConstructor
 public class LoginAuthProvider implements AuthenticationProvider {
 
     @Resource(name = "userDetailsServiceImpl")
     private UserDetailsService userDetailsService;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public LoginAuthProvider(BCryptPasswordEncoder bCryptPasswordEncoder) {
-        this.passwordEncoder = bCryptPasswordEncoder;
-    }
-
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        System.out.println("==============LoginAuthProvider > authenticate================");
         //LoginFilter에서 생성된 Token으로부터 ID/PW 조회
         UsernamePasswordAuthenticationToken authenticationToken
                 = (UsernamePasswordAuthenticationToken) authentication;
@@ -41,19 +37,15 @@ public class LoginAuthProvider implements AuthenticationProvider {
         //UserDetailsService를 통해 DB에서 username으로 사용자 조회
         UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(username);
 
-        /*
-            처음 패스워드를 통한 로그인시
-         */
+        // 처음 패스워드를 통한 로그인시
         if(password != null) {
             if(!passwordEncoder.matches(password,userDetails.getPassword())) {
                 throw new BadCredentialsException(userDetails.getUsername() + " Invalid password");
             }
         }
-
         //인증성공시 -> LoginSuccessHandler 가 호출!
         return new UsernamePasswordAuthenticationToken(userDetails, null);
     }
-
 
     /* 인증처리 가능 여부 판단기준: "인증정보의 클래스 타입"을 보고 판단
         -> 인증을 요청한 LoginFilter는 "UsernamePasswordAuthenticationToken" 인증정보를 생성하여 요청하였음

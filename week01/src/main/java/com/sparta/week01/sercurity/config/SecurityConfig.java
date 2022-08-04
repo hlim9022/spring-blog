@@ -2,9 +2,11 @@ package com.sparta.week01.sercurity.config;
 
 import com.sparta.week01.repository.UserRepository;
 import com.sparta.week01.sercurity.LoginSuccessHandler;
+import com.sparta.week01.sercurity.exception.CustomAccessDeniedHandler;
+import com.sparta.week01.sercurity.exception.CustomAuthenticationEntryPoint;
 import com.sparta.week01.sercurity.filter.JwtAuthFilter;
 import com.sparta.week01.sercurity.filter.LoginFilter;
-import com.sparta.week01.sercurity.provider.LoginAuthProvider;
+import com.sparta.week01.sercurity.exception.provider.LoginAuthProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +28,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final CorsFilter corsFilter;
     private final UserRepository userRepository;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -66,14 +70,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    public void configure(WebSecurity web) {
-        // h2-console 사용에 대한 허용 (CSRF, FrameOptions 무시)
-        web
-                .ignoring()
-                .antMatchers("/h2-console/**");
-    }
-
-    @Override
     public void configure(HttpSecurity http) throws Exception {
         http
                 .csrf().disable()
@@ -84,9 +80,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .and()
                 .formLogin().disable()
                 .httpBasic().disable()
+                .logout().logoutUrl("/blog/members/logout")
+            .and()
+                .exceptionHandling((exception) -> exception
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler))
                 .authorizeRequests((authz)->authz
                         .antMatchers("/blog/auth/**").authenticated()
                         .anyRequest().permitAll());
     }
-
 }

@@ -1,4 +1,4 @@
-package com.sparta.week01.domain;
+package com.sparta.week01.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sparta.week01.dto.BoardRequestDto;
@@ -25,6 +25,7 @@ public class Board extends Timestamped{
     private String title;
 
     @Column(nullable = false)
+    @Lob
     private String content;
 
     @Column(nullable = false)

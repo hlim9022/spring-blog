@@ -1,8 +1,8 @@
 package com.sparta.week01.service;
 
-import com.sparta.week01.domain.Board;
-import com.sparta.week01.domain.Comment;
-import com.sparta.week01.domain.User;
+import com.sparta.week01.entity.Board;
+import com.sparta.week01.entity.Comment;
+import com.sparta.week01.entity.User;
 import com.sparta.week01.dto.CommentDto;
 import com.sparta.week01.dto.ResponseDto;
 import com.sparta.week01.repository.BoardRepository;

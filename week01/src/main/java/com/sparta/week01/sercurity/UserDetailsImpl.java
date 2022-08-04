@@ -1,6 +1,6 @@
 package com.sparta.week01.sercurity;
 
-import com.sparta.week01.domain.User;
+import com.sparta.week01.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,9 +23,6 @@ public class UserDetailsImpl implements UserDetails {
 
     public User getUser(){
         return this.user;
-    }
-    public Long getUserId() {
-        return user.getId();
     }
 
     @Override

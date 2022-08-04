@@ -1,4 +1,4 @@
-package com.sparta.week01.domain;
+package com.sparta.week01.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -27,15 +27,13 @@ public class User extends Timestamped{
     private String password;
 
     @JsonIgnore
-    @Transient
+    @Transient // Entity table에 보이지 않도록하는 annotation
     private String passwordConfirm;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonIgnore
+    @Column
     private String refreshToken;
 
-    public String getRefreshToken() {
-        return this.refreshToken;
-    }
 
     public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
