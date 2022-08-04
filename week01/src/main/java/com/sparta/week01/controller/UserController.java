@@ -20,7 +20,6 @@ public class UserController {
     //회원가입(모두 접근가능)
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody UserSignupDto userSignupDto) {
-        System.out.println("가입시작~~~");
         return userService.join(userSignupDto);
     }
 

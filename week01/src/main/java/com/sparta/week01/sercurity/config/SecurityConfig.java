@@ -4,16 +4,15 @@ import com.sparta.week01.repository.UserRepository;
 import com.sparta.week01.sercurity.LoginSuccessHandler;
 import com.sparta.week01.sercurity.exception.CustomAccessDeniedHandler;
 import com.sparta.week01.sercurity.exception.CustomAuthenticationEntryPoint;
+import com.sparta.week01.sercurity.exception.provider.LoginAuthProvider;
 import com.sparta.week01.sercurity.filter.JwtAuthFilter;
 import com.sparta.week01.sercurity.filter.LoginFilter;
-import com.sparta.week01.sercurity.exception.provider.LoginAuthProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -21,7 +20,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.CorsFilter;
 
-@EnableWebSecurity(debug = true)
+@EnableWebSecurity
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
