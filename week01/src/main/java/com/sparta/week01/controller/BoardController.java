@@ -1,129 +1,61 @@
 package com.sparta.week01.controller;
 
-import com.sparta.week01.domain.*;
+import com.sparta.week01.dto.BoardRequestDto;
+import com.sparta.week01.sercurity.UserDetailsImpl;
 import com.sparta.week01.service.BoardService;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 
 @RestController
+@AllArgsConstructor
+@RequestMapping("/blog")
 public class BoardController {
-
-    private final BoardRepository boardRepository;
     private final BoardService boardService;
 
-    @Autowired
-    public BoardController(BoardRepository boardRepository, BoardService boardService) {
-        this.boardRepository = boardRepository;
-        this.boardService = boardService;
-    }
 
     //전체 블로그글 목록 조회
-    @GetMapping("/blog/list")
-    public ResponseEntity<ResponseTemp<List<ShowAllBoardList>>> getBlogList() {
-        List<ShowAllBoardList> boardList = boardRepository.findAllByOrderByCreatedAtDesc();
-
-        ResponseTemp<List<ShowAllBoardList>> res = new ResponseTemp<>();
-        return new ResponseEntity<>(res.getHttpResponseTemp(HttpStatus.OK.value(), boardList), HttpStatus.OK);
+    @GetMapping("/list")
+    public ResponseEntity<?> getBlogList() {
+        return boardService.getAllBlogList();
     }
 
-
     //글작성
-    @PostMapping("/blog/list")
-    public ResponseEntity<ResponseTemp<Board>> createBlog(@RequestBody BoardRequestDto requestDto) {
-        Board addBoard = boardRepository.save(new Board(requestDto));
-        ResponseTemp<Board> res = new ResponseTemp<>();
-        return new ResponseEntity<>(res.getHttpResponseTemp(HttpStatus.OK.value(), addBoard), HttpStatus.OK);
+    @PostMapping("/auth/list")
+    public ResponseEntity<?> createBlog(@RequestBody BoardRequestDto requestDto,
+                                     @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        String username = userDetails.getUsername();
+        return boardService.createBlog(requestDto, username);
     }
 
     //글 상세조회
-    @GetMapping("/blog/list/{id}")
-    public ResponseEntity<ResponseTemp<Board>> readBlog(@PathVariable Long id) {
-        ResponseTemp<Board> res = new ResponseTemp<>();
+    @GetMapping("/list/{id}")
+    public ResponseEntity<?> readBlog(@PathVariable Long id) {
+        return boardService.getOnePost(id);
+    }
 
-        if(boardRepository.findById(id).isPresent()) {
-            Board findOne = boardRepository.findById(id).get();
-            return new ResponseEntity<>(res.getHttpResponseTemp(HttpStatus.OK.value(), findOne), HttpStatus.OK);
-        } else {
 
-            res.getHttpResponseTemp(HttpStatus.NOT_FOUND.value(),null);
-            return new ResponseEntity<>(res,HttpStatus.NOT_FOUND);
-        }
+    // 글수정
+    @PutMapping("/auth/list/{id}")
+    public ResponseEntity<?> modifyBlog(@PathVariable Long id,
+                                        @RequestBody BoardRequestDto requestDto,
+                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        String username = userDetails.getUsername();
+        return boardService.modifyPost(id, requestDto, username);
     }
 
 
     //글삭제
-    @DeleteMapping("/blog/list/{id}")
-    public ResponseEntity<ResponseTemp<Board>> deleteBlog(@PathVariable Long id,
-                                                          @RequestBody String password) {
-        ResponseTemp<Board> res = new ResponseTemp<>();
-
-        JSONObject jsonObject = new JSONObject(password);
-        int convertPw = jsonObject.getInt("password");
-
-        if(boardRepository.findById(id).isPresent()) {
-            if (boardService.checkPassword(id, convertPw)) {
-                boardRepository.deleteById(id);
-                res.getHttpResponseTemp(HttpStatus.OK.value(), null);
-
-                return new ResponseEntity<>(res, HttpStatus.OK);
-            } else {
-                res.getHttpResponseTemp(HttpStatus.BAD_REQUEST.value(), null);
-                return new ResponseEntity<>(res, HttpStatus.BAD_REQUEST);
-            }
-        } else {
-            res.getHttpResponseTemp(HttpStatus.NOT_FOUND.value(), null);
-            return new ResponseEntity<>(res, HttpStatus.NOT_FOUND);
-        }
-
+    @DeleteMapping("/auth/list/{id}")
+    public ResponseEntity<?> deleteBlog(@PathVariable Long id,
+                                     @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        String username = userDetails.getUsername();
+        System.out.println("게시글 삭제");
+        return boardService.deletePost(id,username);
     }
-
-
-    //글수정
-    @PutMapping("/blog/list/{id}")
-    public ResponseEntity<ResponseTemp<Board>> modifyBlog(@PathVariable Long id,
-                                                          @RequestBody BoardRequestDto requestDto) {
-        ResponseTemp<Board> res = new ResponseTemp<>();
-
-        if(boardRepository.findById(id).isPresent()) {
-            if(boardService.checkPassword(id,requestDto.getPassword())){
-                Board update = boardService.update(id, requestDto);
-                return new ResponseEntity<>(res.getHttpResponseTemp(HttpStatus.OK.value(), update), HttpStatus.OK);
-            } else {
-                res.getHttpResponseTemp(HttpStatus.BAD_REQUEST.value(),null);
-                return new ResponseEntity<>(res,HttpStatus.BAD_REQUEST);
-            }
-        } else {
-            res.getHttpResponseTemp(HttpStatus.NOT_FOUND.value(),null);
-            return new ResponseEntity<>(res,HttpStatus.NOT_FOUND);
-        }
-    }
-
-
-
-    //패스워드 확인
-    @PostMapping("/blog/list/{id}")
-    public ResponseEntity<ResponseTemp<Boolean>>  checkPassword(@PathVariable Long id, @RequestBody String password) {
-        ResponseTemp<Boolean> res = new ResponseTemp<>();
-
-        JSONObject jsonObject = new JSONObject(password);
-        int convertPw = jsonObject.getInt("password");
-
-        boolean result = boardService.checkPassword(id, convertPw);
-
-        if(result) {
-            return new ResponseEntity<>(res.getHttpResponseTemp(HttpStatus.OK.value(),true), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(res.getHttpResponseTemp(HttpStatus.BAD_REQUEST.value(), false), HttpStatus.NOT_FOUND);
-        }
-    }
-
-
-
 
 }
 
